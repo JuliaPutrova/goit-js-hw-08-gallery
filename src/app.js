@@ -65,26 +65,114 @@ const galleryItems = [
 ];
 
 
-const tagsContainer = document.querySelector('.js-gallery');
+const refs = {
+  gallery: document.querySelector(".js-gallery"),
+  modal: document.querySelector(".js-lightbox"),
+  modalImg: document.querySelector(".lightbox__image"),
+};
 
-const createImages = createImagesGrid(galleryItems);
+let activeIndex = null;
 
-tagsContainer.insertAdjacentHTML('beforeend', createImagesGrid);
+// ======================== Step 1 - converting incoming data into Markup ==============================
 
-function createImagesGrid(images) {
-  return images.map(({ preview, original, description }) => {
+// //получаю доступ к родителю галереи:
+
+// const gallery = document.querySelector(".js-gallery");
+
+// переменная для функции создающей разметку:
+
+const imgCardsMarkup = createImgGalleryMarkup(galleryItems);
+
+refs.gallery.insertAdjacentHTML("beforeend", imgCardsMarkup.join(""));
+
+// функция, которая преображает входящий массив объектов в разметку:
+
+function createImgGalleryMarkup(galleryItems) {
+  return galleryItems.map((galleryItem) => {
     return `<li class="gallery__item">
-  <a
-    class="gallery__link"
-    href="${original}"
-  >
-    <img
-      class="gallery__image"
-      src="${preview}"
-      data-source="${original}"
-      alt="${description}"
-    />
-  </a>
-</li>`;
-  }).join('');
+                <a
+                    class="gallery__link"
+                    href="${galleryItem.original}"
+                >
+                <img
+                    class="gallery__image"
+                    src="${galleryItem.preview}"
+                    data-source="${galleryItem.original}"
+                    alt="${galleryItem.description}"
+                    />
+                </a>
+            </li>`;
+  });
+}
+
+// ================================ Step 2 - open && close modal =======================================================
+
+refs.gallery.addEventListener("click", onGalleryClick);
+
+// proverka
+
+function onGalleryClick(event) {
+  event.preventDefault();
+  if (event.target.nodeName !== "IMG") {
+    return;
+  }
+  imgCardsMarkup.forEach((element, index) => {
+    if (element.includes(event.target.src)) {
+      activeIndex = index;
+    }
+  });
+  console.log(activeIndex);
+  window.addEventListener("keydown", keyboardManipulation);
+  refs.modal.classList.add("is-open");
+  refs.modalImg.src = event.target.dataset.source;
+}
+
+// function closeModal(event) {
+//   if (event.target.nodeName === "IMG") {
+//     return;
+//   }
+//   refs.modal.classList.remove("is-open");
+//   refs.modalImg.src = "#";
+// }
+function closeModal() {
+  refs.modal.classList.remove("is-open");
+  refs.modalImg.src = "";
+  refs.modalImg.alt = "";
+  window.removeEventListener("keyup", keyboardManipulation);
+}
+
+refs.modal.addEventListener("click", closeModal);
+// window.addEventListener("keydown", (event) => {
+//   if (event.key === "Escape") {
+//     closeModal(event);
+//   }
+//   return;
+// });
+
+// ================================ Step 3 - switch with arrows =======================================================
+
+function keyboardManipulation(e) {
+  switch (e.key) {
+    case activeIndex < galleryItems.length - 1 && "ArrowRight":
+      activeIndex += 1;
+      refs.modalImg.src = galleryItems[activeIndex].original;
+      break;
+    case activeIndex > 0 && "ArrowLeft":
+      activeIndex -= 1;
+      refs.modalImg.src = galleryItems[activeIndex].original;
+      break;
+    case activeIndex === 0 && "ArrowLeft":
+      activeIndex = galleryItems.length - 1;
+      refs.modalImg.src = galleryItems[activeIndex].original;
+      break;
+    case activeIndex === galleryItems.length - 1 && "ArrowRight":
+      activeIndex = 0;
+      refs.modalImg.src = galleryItems[activeIndex].original;
+      break;
+    case "Escape":
+      closeModal();
+      break;
+    default:
+      alert("что-то пошло не так");
+  }
 }
