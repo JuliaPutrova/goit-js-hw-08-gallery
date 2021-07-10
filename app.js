@@ -64,7 +64,6 @@ const galleryItems = [
   },
 ];
 
-
 const refs = {
   gallery: document.querySelector(".js-gallery"),
   modal: document.querySelector(".js-lightbox"),
@@ -149,7 +148,7 @@ refs.modal.addEventListener("click", closeModal);
 //   return;
 // });
 
-// ================================ Step 3 - switch with arrows =======================================================
+// ================================ Step 3 - switch with arrows =======================================================//
 
 function keyboardManipulation(e) {
   switch (e.key) {
